@@ -22,7 +22,10 @@ df.iloc[2, 2] = np.nan
 print(
     df.consolidate_se(
         ["coef", "coef_"], ["se1", "se1_"], ["se2", "se2_"]
-    ).to_latex_table(caption="my table")
+    ).to_latex_table(
+        caption="this is a table",
+        mathify_args=dict(texttt_column=True, texttt_index=True),
+    )
 )
 
 
@@ -39,21 +42,21 @@ outputs
         \vspace{1em}
         \begin{tabular}{lccc}
 \toprule
-{} &                                       coef &                                      coef_ &                                      other \\
+{} &                              \texttt{coef} &                            \texttt{coef\_} &                             \texttt{other} \\
 {} & \hypertarget{tabcol:this_is_a_table1}{(1)} & \hypertarget{tabcol:this_is_a_table2}{(2)} & \hypertarget{tabcol:this_is_a_table3}{(3)} \\
 \midrule
-arg1 &                                    $0.463$ &                                    $0.527$ &                                   $-0.959$ \\
-     &                                 ($-0.964$) &                                  ($0.084$) &                                            \\
-     &                                 [$-1.125$] &                                 [$-1.291$] &                                            \\
-arg2 &                                   $-0.252$ &                                   $-0.132$ &                                    $1.674$ \\
-     &                                 ($-2.107$) &                                  ($0.012$) &                                            \\
-     &                                  [$2.146$] &                                  [$1.397$] &                                            \\
-arg3 &                                    $0.776$ &                                    $0.221$ &                                   $-1.079$ \\
-     &                                  ($0.836$) &                                 ($-1.001$) &                                            \\
-     &                                        --- &                                  [$0.859$] &                                            \\
-arg4 &                                    $0.253$ &                                   $-0.915$ &                                   $-0.409$ \\
-     &                                 ($-0.180$) &                                  ($0.940$) &                                            \\
-     &                                 [$-1.483$] &                                 [$-0.276$] &                                            \\
+\texttt{arg1} &                                   $-0.620$ &                                    $1.217$ &                                   $-1.211$ \\
+              &                                 ($-0.328$) &                                 ($-0.643$) &                                            \\
+              &                                  [$0.933$] &                                 [$-1.637$] &                                            \\
+\texttt{arg2} &                                   $-2.708$ &                                   $-0.205$ &                                   $-0.014$ \\
+              &                                 ($-0.574$) &                                  ($0.179$) &                                            \\
+              &                                 [$-0.123$] &                                  [$0.572$] &                                            \\
+\texttt{arg3} &                                   $-2.016$ &                                    $0.797$ &                                    $0.353$ \\
+              &                                 ($-1.121$) &                                 ($-2.756$) &                                            \\
+              &                                        --- &                                 [$-0.503$] &                                            \\
+\texttt{arg4} &                                    $0.559$ &                                   $-0.177$ &                                    $1.187$ \\
+              &                                  ($0.256$) &                                 ($-1.000$) &                                            \\
+              &                                 [$-1.450$] &                                  [$0.936$] &                                            \\
 \bottomrule
 \end{tabular}
 
