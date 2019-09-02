@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import Callable, Iterable
 import pandas_flavor as pf
 
+from statsmodels.iolib.summary2 import summary_col
 import pyperclip
 
 try:
@@ -149,7 +150,7 @@ def mathify(
     additional_enclosures: Iterable[Enclosure] = [],
     auto_scientific: bool = True,
 ) -> str:
-    f"""
+    """
     Convert a string or a numeric variable into LaTeX representations.
 
     - Automatically adds commas to large integers
@@ -160,7 +161,20 @@ def mathify(
     ----------
     s : str or float or int
         The string to be converted into LaTeX
-    {kwarg_docstring}
+    num_digit : int, optional
+        Number of digits after the decimal point represented, by default 3.
+        Integers that are > 1 are ignored.
+    large : int, optional
+        The upper limit until scientific notation; scientific notation is activated if
+        s > 10 ** large; the parameter is ignored if auto_scientific is False, by default 9
+    na_rep : str, optional
+        Representation of missing values (NaN, nan, None, etc.), by default "---"
+    additional_enclosures : Iterable[Enclosure], optional
+        Additional enclosures to be checked by mathify, by default []
+    auto_scientific : bool, optional
+        Whether to convert automatically into scientific notation, by default True.
+        Scientific notation is activated if number is outside of
+        [10 ** -num_digit, 10 ** large]
 
     Returns
     -------
@@ -225,7 +239,7 @@ def mathify(
 
 
 def mathify_column(x: pd.Series, **kwargs) -> pd.Series:
-    f"""
+    """
     Mathify (when one could) a pd.Series iteratively
 
     Parameters
@@ -234,7 +248,20 @@ def mathify_column(x: pd.Series, **kwargs) -> pd.Series:
         The input series
 
     **kwargs:
-    {kwarg_docstring}
+        num_digit : int, optional
+            Number of digits after the decimal point represented, by default 3.
+            Integers that are > 1 are ignored.
+        large : int, optional
+            The upper limit until scientific notation; scientific notation is activated if
+            s > 10 ** large; the parameter is ignored if auto_scientific is False, by default 9
+        na_rep : str, optional
+            Representation of missing values (NaN, nan, None, etc.), by default "---"
+        additional_enclosures : Iterable[Enclosure], optional
+            Additional enclosures to be checked by mathify, by default []
+        auto_scientific : bool, optional
+            Whether to convert automatically into scientific notation, by default True.
+            Scientific notation is activated if number is outside of
+            [10 ** -num_digit, 10 ** large]
 
     Returns
     -------
@@ -248,7 +275,7 @@ def mathify_column(x: pd.Series, **kwargs) -> pd.Series:
 def mathify_table(
     df: pd.DataFrame, texttt_index: bool = False, texttt_column: bool = False, **kwargs
 ) -> pd.DataFrame:
-    f"""
+    """
     Mathify a pd.DataFrame iteratively
 
     Parameters
@@ -264,7 +291,20 @@ def mathify_table(
 
 
     **kwargs:
-    {kwarg_docstring}
+        num_digit : int, optional
+            Number of digits after the decimal point represented, by default 3.
+            Integers that are > 1 are ignored.
+        large : int, optional
+            The upper limit until scientific notation; scientific notation is activated if
+            s > 10 ** large; the parameter is ignored if auto_scientific is False, by default 9
+        na_rep : str, optional
+            Representation of missing values (NaN, nan, None, etc.), by default "---"
+        additional_enclosures : Iterable[Enclosure], optional
+            Additional enclosures to be checked by mathify, by default []
+        auto_scientific : bool, optional
+            Whether to convert automatically into scientific notation, by default True.
+            Scientific notation is activated if number is outside of
+            [10 ** -num_digit, 10 ** large]
 
     Returns
     -------
@@ -310,7 +350,7 @@ def to_latex_table(
     mathify_args: dict = dict(),
     to_latex_args: dict = dict(),
 ) -> str:
-    f"""
+    """
     Convert a pd.DataFrame to string for LaTeX table or threeparttable environment
 
     Parameters
@@ -340,10 +380,25 @@ def to_latex_table(
     mathify_args : dict, optional
         Arguments passed to mathify, by default dict()
         Arguments:
-        {kwarg_docstring.split}
+            texttt_column : bool
+            texttt_index : bool
+            num_digit : int, optional
+                Number of digits after the decimal point represented, by default 3.
+                Integers that are > 1 are ignored.
+            large : int, optional
+                The upper limit until scientific notation; scientific notation is activated if
+                s > 10 ** large; the parameter is ignored if auto_scientific is False, by default 9
+            na_rep : str, optional
+                Representation of missing values (NaN, nan, None, etc.), by default "---"
+            additional_enclosures : Iterable[Enclosure], optional
+                Additional enclosures to be checked by mathify, by default []
+            auto_scientific : bool, optional
+                Whether to convert automatically into scientific notation, by default True.
+                Scientific notation is activated if number is outside of
+                [10 ** -num_digit, 10 ** large]
     to_latex_args : dict, optional
         Arguments passed to pd.DataFrame.to_latex, by default dict()
-        {pd.DataFrame.to_latex.__docstring__}
+        See pd.DataFrame.to_latex
 
     Returns
     -------
@@ -515,3 +570,64 @@ def consolidate_se(
         )
     col_order = list(filter(lambda x: x in coef_cols or x in rest, df.columns))
     return pd.concat(return_df, axis=1, sort=False)[col_order].copy()
+
+
+def regression_table(regs, notes=None, stars=True, **kwargs):
+    """
+    Create a pandas.DataFrame object summarizing a series of regressions
+
+    Parameters
+    ----------
+    regs: a list of statsmodels.regression.linear_model.RegressionResults
+        objects, one for each column of the regression table
+
+    notes: optional, a dict of additional rows to the table. Each key (string) is
+        the name of a row, and each associated value (list of string) is the content
+
+
+    stars : bool, optional
+        whether or not to include stars, by default False
+
+    **kwargs: Additional arguments passed to statsmodels.iolib.summary2.summary_col
+        Summarize multiple results instances side-by-side (coefs and SEs)
+
+        results : statsmodels results instance or list of result instances
+        float_format : string, optional
+            float format for coefficients and standard errors
+            Default : '%.4f'
+        model_names : list of strings, optional
+            Must have same length as the number of results. If the names are not
+            unique, a roman number will be appended to all model names
+        stars : bool
+            print significance stars
+        info_dict : dict
+            dict of functions to be applied to results instances to retrieve
+            model info. To use specific information for different models, add a
+            (nested) info_dict with model name as the key.
+            Example: `info_dict = {"N":..., "R2": ..., "OLS":{"R2":...}}` would
+            only show `R2` for OLS regression models, but additionally `N` for
+            all other results.
+            Default : None (use the info_dict specified in
+            result.default_model_infos, if this property exists)
+        regressor_order : list of strings, optional
+            list of names of the regressors in the desired order. All regressors
+            not specified will be appended to the end of the list.
+        drop_omitted : bool, optional
+            Includes regressors that are not specified in regressor_order. If False,
+            regressors not specified will be appended to end of the list. If True,
+            only regressors in regressors_list will be included.
+
+    Returns
+    -------
+    t: pd.DataFrame, a pandas.DataFrame of a regression table
+    """
+
+    d = {
+        "$N$": lambda x: "{0:d}".format(int(x.nobs)),
+        "$R^2$": lambda x: "{:.2f}".format(x.rsquared),
+    }
+    t = summary_col(regs, stars=stars, info_dict=d, **kwargs).tables[0].copy()
+    if notes:
+        for k, v in notes.items():
+            t.loc[k] = v
+    return t
