@@ -9,47 +9,55 @@ def display_columns(df):
     representing the list of selected columns.
     """
     dt = list(df.dtypes.items())
-    column_display = [f'{c} ({str(t)})' for c, t in dt]
+    column_display = [f"{c} ({str(t)})" for c, t in dt]
     column = [c for c, t in dt]
     w = widgets.SelectMultiple(options=list(zip(column_display, column)))
     h = widgets.BoundedIntText(value=5, min=1, max=len(df))
+
     def print_columns(columns=None, head=5):
         if columns is None:
             return
         else:
-            inner = map(lambda t : '"' + str(t) + '"', columns)
+            inner = map(lambda t: '"' + str(t) + '"', columns)
             print(f"cols_selected = [{', '.join(inner)}]")
             print()
             if len(columns) == 0:
-                  return
+                return
             try:
                 display(df[list(columns)].head(head).style)
             except AttributeError:
                 pass
-    return interactive(print_columns, columns=w, head=h)
 
+    return interactive(print_columns, columns=w, head=h)
 
 
 def rename_dict(df):
     """
     Provide a GUI for genearting the dict to pass into df.rename(columns=r_dict)
     """
+
     def tgg(b):
         if b.alt_text.value != b.text.value:
             b.alt_text.value = b.text.value
         else:
-            b.alt_text.value = b.text.value.lower().strip().replace(' ', '_')
+            b.alt_text.value = b.text.value.lower().strip().replace(" ", "_")
+
     lst = []
-    button = widgets.Button(description='Add column', icon="plus")
-    finish = widgets.Button(description='Get recipe', icon="check")
+    button = widgets.Button(description="Add column", icon="plus")
+    finish = widgets.Button(description="Get recipe", icon="check")
     out = widgets.Output()
     out2 = widgets.Output()
+
     def on_button_clicked(b):
         with out:
-            ind = min(len(lst), len(df.columns)-1)
-            text = widgets.Dropdown(index=ind, description="Old name", options=df.columns)
-            alt_text = widgets.Text(description="New name",
-                                    value=df.columns[ind].lower().strip().replace(' ', '_'))
+            ind = min(len(lst), len(df.columns) - 1)
+            text = widgets.Dropdown(
+                index=ind, description="Old name", options=df.columns
+            )
+            alt_text = widgets.Text(
+                description="New name",
+                value=df.columns[ind].lower().strip().replace(" ", "_"),
+            )
             tg = widgets.Button(description="Toggle suggestion")
             tg.alt_text = alt_text
             tg.text = text
@@ -59,11 +67,10 @@ def rename_dict(df):
             display(widgets.HBox([text, alt_text, tg]))
         out2.clear_output()
 
-
     def display_dict(b):
         out2.clear_output()
         with out2:
-            s1 = repr({k.value : v.value for k, v in lst})
+            s1 = repr({k.value: v.value for k, v in lst})
             print(f"df.rename(columns={s1})")
 
     button.on_click(on_button_clicked)
