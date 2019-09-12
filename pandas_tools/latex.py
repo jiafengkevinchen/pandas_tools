@@ -348,7 +348,7 @@ def to_latex_table(
     vspace: float = 1,
     additional_text: str = "",
     mathify_args: dict = dict(),
-    to_latex_args: dict = dict(),
+    to_latex_args: dict = None,
 ) -> str:
     """
     Convert a pd.DataFrame to string for LaTeX table or threeparttable environment
@@ -426,6 +426,10 @@ def to_latex_table(
             append=True,
         ).T.copy()
 
+
+    if to_latex_args is None:
+        to_latex_args = {}
+
     if "column_format" not in to_latex_args:
         to_latex_args["column_format"] = "l" + "c" * df.shape[-1]
 
@@ -433,6 +437,7 @@ def to_latex_table(
     pd.set_option("max_colwidth", 10000)
     table_str = t.to_latex(escape=False, **to_latex_args)
     pd.set_option("max_colwidth", opt_val)
+
 
     # No threeparttable
     if notes is None and star_notes is None:
