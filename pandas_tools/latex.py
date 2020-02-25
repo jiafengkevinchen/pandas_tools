@@ -426,7 +426,6 @@ def to_latex_table(
             append=True,
         ).T.copy()
 
-
     if to_latex_args is None:
         to_latex_args = {}
 
@@ -437,7 +436,6 @@ def to_latex_table(
     pd.set_option("max_colwidth", 10000)
     table_str = t.to_latex(escape=False, **to_latex_args)
     pd.set_option("max_colwidth", opt_val)
-
 
     # No threeparttable
     if notes is None and star_notes is None:
